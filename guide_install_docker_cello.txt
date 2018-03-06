@@ -90,7 +90,9 @@ Note: Readmore from "http://hyperledger-cello.readthedocs.io/en/latest/installat
 	b3. add your proxy and non_proxy:ip look like sample
 		[Service]
 		Environment="HTTP_PROXY=http://192.168.193.13:3128/" "HTTPS_PROXY=http://192.168.193.13:3128/" 				"NO_PROXY=localhost,192.168.158.94,127.0.0.1,docker-registry.somecorporation.com"
-		
+	b4. reload daemon and restart servide
+		sudo systemctl daemon-reload
+		sudo systemctl restart docker.service
 	
 
 3.Config proxy for npm-----
