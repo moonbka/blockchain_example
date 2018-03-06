@@ -81,16 +81,18 @@ Note: Readmore from "http://hyperledger-cello.readthedocs.io/en/latest/installat
 
 2.Set proxy, no_proxy for docker-----
 	b1.sudo mkdir -p /etc/systemd/system/docker.service.d
-	b2.create file "etc/systemd/system/docker.service.d/http-proxy.conf"
+	b2.create file "/etc/systemd/system/docker.service.d/http-proxy.conf"
 	b3.add your proxy and non_proxy:ip look like sample
-		{
-			Environment="HTTP_PROXY=http://192,168.193.23:3128/" "HTTPS_PROXY=http://192.168.193.23:3128/" 				"NO_PROXY=localhost,192.168.158.94,127.0.0.1,docker-registry.somecorporation.com"
-		}
+		[Service]
+		Environment="HTTP_PROXY=http://192.168.193.13:3128/" "HTTPS_PROXY=http://192.168.193.13:3128/" 				"NO_PROXY=localhost,192.168.158.94,127.0.0.1,docker-registry.somecorporation.com"
+		
 	
 
 3.Config proxy for npm-----
-	1.$ npm config set proxy http://192.168.193.23:3128/
-	2.$ npm config set https-proxy https://192.168.193.23:3128/
+	1.$ npm config set $(echo $http_proxy)
+	2.$ npm config set https-proxy $(echo $https_proxy)
+	3, if it not work, try this command: 
+		$ npm config set registry "http://registry.npmjs.org/"
 
 
 4.Setting virtual-machine to setup cello-worker-----
@@ -118,4 +120,3 @@ Note: Readmore from "http://hyperledger-cello.readthedocs.io/en/latest/installat
 				Dockerfile
 
 --------------------------------------------------------------------------------
-Nguyen sua cho nay
