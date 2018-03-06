@@ -1,0 +1,121 @@
+-------------------------------------------setup and remove docker-ce on ubuntu 16.04--------------------
+1.Install
+	B1. "sudo apt-get update"
+	B2. "sudo apt-get install \
+		  apt-transport-https \
+		  ca-certificates \
+		  curl \
+		  software-properties-common"
+	B3. "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -"
+	B4. "sudo apt-key fingerprint 0EBFCD88"
+	B5. "sudo add-apt-repository \
+		 "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+		 $(lsb_release -cs) \
+		 stable"
+	B6. "sudo apt-get update"
+	B7. "sudo apt-get install docker-ce"
+
+2. Remove
+	B1.sudo apt-get purge docker-ce
+	B2.sudo rm -rf /var/lib/docker
+
+3. Command Docker
+	1.Container
+		#manual command
+			docker build -t name_image .  										# Create image using this directory's Dockerfile
+			docker run -p 4000:80 name_image  								# Run "name_image" mapping port 4000 to 80
+			docker run -d -p 4000:80 name_image         			# Same thing, but in detached mode
+			docker container ls                                	# List all running containers
+			docker container ls -a             									# List all containers, even those not running
+			docker container stop <hash>           							# Gracefully stop the specified container
+			docker container kill <hash>         								# Force shutdown of the specified container
+			docker container rm <hash>        									# Remove specified container from this machine
+			docker container rm $(docker container ls -a -q)    # Remove all containers
+			docker image ls -a                            			# List all images on this machine
+			docker image rm <image id>            							# Remove specified image from this machine
+			docker image rm $(docker image ls -a -q)   					# Remove all images from this machine
+			or docker image rmi -f $(docker image ls -a -q) (delete all image on machine)
+			docker login             														# Log in this CLI session using your Docker credentials
+			docker tag <image> username/repository:tag  				# Tag <image> for upload to registry
+			docker push username/repository:tag            			# Upload tagged image to registry
+			docker run username/repository:tag                  # Run image from a registry
+		#special command
+		1.access into container "docker exec -it <mycontainer> bash"
+		2.show all container active "docker ps"
+
+--------------------------------------------setup hyperledger-cello----------------
+1. Setup master
+	1.Clone code
+			sudo aptitude install git make -y
+			git clone http://gerrit.hyperledger.org/r/cello && cd cello
+	2.make setup-master (check note fixed when error)
+	3.make start. command support for make (read /Makefile)
+	4.Check on "localhost:8080" and "localhost:8081"
+		
+2. Setup worker
+	if the same master machine, u should use virtualbox to create a new ubuntu support to install cello-worker. 
+	1.  Let Docker daemon listen on port 2375
+			1.Change "ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --api-cors-header='*' --default-ulimit=nofile=8192:16384 --default-ulimit=nproc=8192:16384" on "/lib/systemd/system/docker.service" file
+			2.sudo systemctl daemon-reload
+			3.sudo systemctl restart docker.service
+
+	2.Clone code
+			sudo aptitude install git make -y
+			git clone http://gerrit.hyperledger.org/r/cello && cd cello
+	3.make setup-worker
+3. Command to check port
+	1.telnet
+	2.sudo netstat -plnt
+
+Note: Readmore from "http://hyperledger-cello.readthedocs.io/en/latest/installation_worker_docker/#setup-docker-host-as-worker-node"
+--------------------------------------------note fixed-----------------------------
+1.Set env proxy, no_proxy on ubuntu-----
+	vim /etc/environment
+		{
+			PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games"
+			http_proxy="http://192.168.193.13:3128/"
+			https_proxy="https://192.168.193.13:3128/"
+			no_proxy="localhost,127.0.0.1,local.home,192.168.158.8,192.168.158.96,192.168.158.98,test.xyz"
+		}
+
+
+2.Set proxy, no_proxy for docker-----
+	b1.sudo mkdir -p /etc/systemd/system/docker.service.d
+	b2.create file "etc/systemd/system/docker.service.d/http-proxy.conf"
+	b3.add your proxy and non_proxy:ip look like sample
+		{
+			Environment="HTTP_PROXY=http://192,168.193.23:3128/" "HTTPS_PROXY=http://192.168.193.23:3128/" 				"NO_PROXY=localhost,192.168.158.94,127.0.0.1,docker-registry.somecorporation.com"
+		}
+	
+
+3.Config proxy for npm-----
+	1.$ npm config set proxy http://192.168.193.23:3128/
+	2.$ npm config set https-proxy https://192.168.193.23:3128/
+
+
+4.Setting virtual-machine to setup cello-worker-----
+	1.setup virtual-machine ubuntu
+	2.config bridge network on virtual-machine via ethernet or wireless.
+	3.download hyperledger-cello project and setting worker.
+	4.fix proxy,no_proxy for docker, virtual-machine. Finish.
+	maybe access into virtual-machine by ssh (must install ssh-server on virtual-machine)
+			"apt-get install openssh-server"
+
+
+5.Fix access internet behind proxy on when build image from dockerfile------
+	1.add these line before command that will access internet.
+		"ENV http_proxy http://192.168.193.23:3128/"
+		"ENV https_proxy https://192.168.193.23:3128/"
+	if exits npm 
+		"RUN npm config set proxy http://192.168.193.23:3128/"
+
+	note: if "make cello-worker" have to fix there dockerfile under:
+		/src/
+				Dockerfile-dashboard
+				Dockerfile-restserver
+				Dockerfile-watchdog 
+		/user-dashboard/
+				Dockerfile
+
+--------------------------------------------------------------------------------
+
