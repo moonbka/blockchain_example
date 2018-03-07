@@ -95,7 +95,7 @@ Note: Readmore from "http://hyperledger-cello.readthedocs.io/en/latest/installat
 		sudo systemctl restart docker.service
 	
 
-4.Install node and npm
+3.Install node and npm
 	1. update pakage lists
 		sudo apt-add-repository -y ppa:git-core/ppa
 		sudo apt-get update
@@ -107,7 +107,7 @@ Note: Readmore from "http://hyperledger-cello.readthedocs.io/en/latest/installat
 	4. install version of node
 		nvm install 6.9.4
 
-3.Config proxy for npm-----
+4.Config proxy for npm-----
 	1.
 		npm config set $(echo $http_proxy)
 		npm config set https-proxy $(echo $https_proxy)
@@ -115,7 +115,7 @@ Note: Readmore from "http://hyperledger-cello.readthedocs.io/en/latest/installat
 		npm config set registry "http://registry.npmjs.org/"
 
 
-4.Setting virtual-machine to setup cello-worker-----
+5.Setting virtual-machine to setup cello-worker-----
 	1.setup virtual-machine ubuntu
 	2.config bridge network on virtual-machine via ethernet or wireless.
 	3.download hyperledger-cello project and setting worker.
@@ -124,7 +124,7 @@ Note: Readmore from "http://hyperledger-cello.readthedocs.io/en/latest/installat
 			"apt-get install openssh-server"
 
 
-5.Fix access internet behind proxy on when build image from dockerfile------
+6.Fix access internet behind proxy on when build image from dockerfile------
 	1.add these line before command that will access internet.
 		"ENV http_proxy http://192.168.193.23:3128/"
 		"ENV https_proxy https://192.168.193.23:3128/"
